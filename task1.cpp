@@ -1,31 +1,48 @@
-#include<iostream>
+#include <iostream>
+#include "omp.h"
+#include <cstdlib>
+#include <random>
+#include <vector>
+#include <algorithm>
+#include <ctime>
 
 using namespace std;
 
-int count_words(char* sentence) {
-    int count = 1;
-    int iter = 0;
-    char sign;
-    char pre_sign = ' ';
-    do {
-        pre_sign = sign;
-        sign = sentence[iter];
-        if (sign == ' ' && pre_sign != ' ' && iter != 0) count++;
-        iter++;
-    } while (sign != '\0');
-    if (pre_sign == ' ') count --;
-    return count;
+const int THREAD_NUMBER = 6;
+
+vector<int> gen_random_vec(int vec_size){
+    vector<int> ret(vec_size);
+    srand(int(time(nullptr)));
+    generate(ret.begin(), ret.end(), rand);
+    return ret;
 }
 
 int main(int argc, char* argv[]) {
-    if (argc == 0) {
-        return 0;
-    }
+    if (argc != 2) return 0;
+    const int entities_number = atoi(argv[1]);
 
-    int count = 0;
-    cout<<argv[1]<<endl;
-    if (argv[0] != "\0") {
-        count = count_words(argv[1]);
+    vector<int> vec = gen_random_vec(entities_number);
+    for (int i = 0; i < entities_number; i++) {
+        cout<<vec[i]<<endl;
     }
-    cout<<"Word count is: "<<count<<endl;
+    int batch_size = entities_number/THREAD_NUMBER;
+
+    int max_elem = 0;
+    #pragma omp parallel reduction (max:max_elem) num_threads(6)
+    {
+        int rank = omp_get_thread_num();
+        int start = batch_size * rank;
+        int end = batch_size * (rank + 1);
+        if (rank == THREAD_NUMBER - 1) {
+            end = entities_number;
+        }
+
+        max_elem = vec[start];
+        for (int i = start + 1; i < end; i++) {
+            if (vec[i] > max_elem) {
+                max_elem = vec[i];
+            }
+        }
+    }
+    cout<<endl<<"Biggest is"<<max_elem<<endl;
 }
