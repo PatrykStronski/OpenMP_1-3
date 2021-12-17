@@ -8,7 +8,7 @@
 
 using namespace std;
 
-const int THREAD_NUMBER = 4;
+const int THREAD_NUMBER = 5;
 const int MAX_ITERS = 5;
 const bool TEST = false;
 
@@ -60,6 +60,7 @@ void print_matrix(vector<vector<int>> mat, int entities_number) {
 }
 
 int main(int argc, char* argv[]) {
+    omp_set_num_threads(THREAD_NUMBER);
     if (argc != 2) return 0;
     const int entities_number = atoi(argv[1]);
 
@@ -82,23 +83,18 @@ int main(int argc, char* argv[]) {
     cout<<"IJK ORDER"<<endl;
     for (int i = 0; i < MAX_ITERS; i++) {
         clock_t t = clock();
-        #pragma omp parallel
-        {
-            int rank = omp_get_thread_num();
-            int start = batch_size * rank;
-            int end = batch_size * (rank + 1);
-            if (rank == THREAD_NUMBER - 1) {
-                end = entities_number;
-            }
-            for (int i = start; i < end; i++)
+        #pragma omp parallel for collapse(3)
+            for (int i = 0; i < entities_number; i++)
                     for (int j = 0; j < entities_number; j++)
                             for (int k = 0; k < entities_number; k++)
                                     res[i][j] += mat1[i][k] * mat2[k][j];
-        }
-        exec_time += (clock() - t)/MAX_ITERS;
+        exec_time += (clock() - t);
         //print_matrix(res, entities_number);
         //cout << "Time ijk loops is " << t / CLOCKS_PER_SEC << " seconds" <<  endl;
     }
+    exec_time = exec_time/MAX_ITERS;
+    cout<<exec_time/ CLOCKS_PER_SEC;
+
 
     cout << "Time ijk loops is " << exec_time / CLOCKS_PER_SEC << " seconds" <<  endl;
     exec_time = 0;
@@ -106,19 +102,11 @@ int main(int argc, char* argv[]) {
     cout<<endl<<"JKI ORDER"<<endl;
     for (int i = 0; i < MAX_ITERS; i++) {
         clock_t t = clock();
-        #pragma omp parallel num_threads(4)
-        {
-            int rank = omp_get_thread_num();
-            int start = batch_size * rank;
-            int end = batch_size * (rank + 1);
-            if (rank == THREAD_NUMBER - 1) {
-                end = entities_number;
-            }
-            for (int j = start; j < end; j++)
+        #pragma omp parallel for collapse(3)
+            for (int j = 0; j < entities_number; j++)
                     for (int k = 0; k < entities_number; k++)
                             for (int i = 0; i < entities_number; i++)
                                     res[i][j] += mat1[i][k] * mat2[k][j];
-        }
         exec_time += (clock() - t)/MAX_ITERS;
 
         //print_matrix(res, entities_number);
@@ -132,19 +120,11 @@ int main(int argc, char* argv[]) {
     cout<<endl<<"IKJ ORDER"<<endl;
     for (int i = 0; i < MAX_ITERS; i++) {
         clock_t t = clock();
-        #pragma omp parallel num_threads(4)
-        {
-            int rank = omp_get_thread_num();
-            int start = batch_size * rank;
-            int end = batch_size * (rank + 1);
-            if (rank == THREAD_NUMBER - 1) {
-                end = entities_number;
-            }
-            for (int i = start; i < end; i++)
+        #pragma omp parallel for collapse(3)
+            for (int i = 0; i < entities_number; i++)
                     for (int k = 0; k < entities_number; k++)
                             for (int j = 0; j < entities_number; j++)
                                     res[i][j] += mat1[i][k] * mat2[k][j];
-        }
         exec_time += (clock() - t)/MAX_ITERS;
 
         //print_matrix(res, entities_number);

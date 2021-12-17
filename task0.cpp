@@ -8,22 +8,26 @@ int count_words(char* sentence) {
     char sign;
     char pre_sign = ' ';
     do {
+        if ((int)sentence[iter] < 48 && (int)sentence[iter] > 32) {
+            iter++;
+            continue;
+        }
         pre_sign = sign;
         sign = sentence[iter];
         if (sign == ' ' && pre_sign != ' ' && iter != 0) count++;
         iter++;
     } while (sign != '\0');
-    if (pre_sign == ' ') count --;
+    if (pre_sign == ' ' || ((int)pre_sign < 48 && count == 1)) count --;
     return count;
 }
 
 int main(int argc, char* argv[]) {
-    if (argc == 0) {
+    if (argc < 2) {
+        cout<<"No string provided"<<endl;
         return 0;
     }
 
     int count = 0;
-    cout<<argv[1]<<endl;
     if (argv[0] != "\0") {
         count = count_words(argv[1]);
     }

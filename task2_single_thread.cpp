@@ -8,7 +8,7 @@
 
 using namespace std;
 
-const int THREAD_NUMBER = 4;
+const int THREAD_NUMBER = 1;
 const int MAX_ITERS = 5;
 const bool TEST = false;
 
@@ -82,7 +82,7 @@ int main(int argc, char* argv[]) {
     cout<<"IJK ORDER"<<endl;
     for (int i = 0; i < MAX_ITERS; i++) {
         clock_t t = clock();
-        #pragma omp parallel
+        #pragma omp parallel num_threads(1)
         {
             int rank = omp_get_thread_num();
             int start = batch_size * rank;
@@ -95,7 +95,7 @@ int main(int argc, char* argv[]) {
                             for (int k = 0; k < entities_number; k++)
                                     res[i][j] += mat1[i][k] * mat2[k][j];
         }
-        exec_time += (clock() - t)/MAX_ITERS;
+        exec_time += clock() - t;
         //print_matrix(res, entities_number);
         //cout << "Time ijk loops is " << t / CLOCKS_PER_SEC << " seconds" <<  endl;
     }
@@ -106,7 +106,7 @@ int main(int argc, char* argv[]) {
     cout<<endl<<"JKI ORDER"<<endl;
     for (int i = 0; i < MAX_ITERS; i++) {
         clock_t t = clock();
-        #pragma omp parallel num_threads(4)
+        #pragma omp parallel num_threads(1)
         {
             int rank = omp_get_thread_num();
             int start = batch_size * rank;
@@ -119,7 +119,7 @@ int main(int argc, char* argv[]) {
                             for (int i = 0; i < entities_number; i++)
                                     res[i][j] += mat1[i][k] * mat2[k][j];
         }
-        exec_time += (clock() - t)/MAX_ITERS;
+        exec_time += clock() - t;
 
         //print_matrix(res, entities_number);
 
@@ -132,7 +132,7 @@ int main(int argc, char* argv[]) {
     cout<<endl<<"IKJ ORDER"<<endl;
     for (int i = 0; i < MAX_ITERS; i++) {
         clock_t t = clock();
-        #pragma omp parallel num_threads(4)
+        #pragma omp parallel num_threads(1)
         {
             int rank = omp_get_thread_num();
             int start = batch_size * rank;
@@ -145,7 +145,7 @@ int main(int argc, char* argv[]) {
                             for (int j = 0; j < entities_number; j++)
                                     res[i][j] += mat1[i][k] * mat2[k][j];
         }
-        exec_time += (clock() - t)/MAX_ITERS;
+        exec_time += clock() - t;
 
         //print_matrix(res, entities_number);
 

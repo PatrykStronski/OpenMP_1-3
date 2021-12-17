@@ -1,0 +1,1 @@
+g++ -fopenmp -O3 task2_automatic.cpp
